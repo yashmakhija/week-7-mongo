@@ -101,6 +101,29 @@ app.get("/todos", auth, async function (req, res) {
   }
 });
 
+app.put("/todo/:id", auth, async (req, res) => {
+  const userId = req.userId;
+  const { id } = req.params;
+  const { done } = req.body;
+  try {
+    const todo = await TodoModel.findOne({ _id: id, userId });
+
+    if (!todo) {
+      return res
+        .status(404)
+        .json({ message: "Todo not found or you do not have access" });
+    }
+
+    todo.done = done;
+    await todo.save();
+
+    res.json({ message: "Todo updated successfully", todo });
+  } catch (err) {
+    console.error("Update Todo error:", err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
 });
